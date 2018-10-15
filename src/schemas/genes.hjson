@@ -1,0 +1,24 @@
+{
+  $schema: 'http://json-schema.org/draft-07/schema',
+  description: 'Schema for the `genes` collection.',
+  version: 1,
+  type: 'object',
+  required: [],
+  properties: {
+    note: {type: 'string'},
+    codon_start: {type: 'string'},
+    inference: {type: 'string'},
+    location_end: {type: 'integer', minimum: 0},
+    location_start: {type: 'integer', minimum: 0},
+    db_xref: {type: 'string'},
+    old_locus_tag: {type: 'string'},
+    product: {type: 'string'},
+    protein_id: {type: 'string'},
+    ref: {type: 'string'},
+    ref_db: {type: 'string'},
+    strand: {type: 'integer', minimum: 0},
+    transl_table: {type: 'string'},
+    translation: {type: 'string'}
+  },
+  additionalProperties: false
+}
