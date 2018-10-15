@@ -1,0 +1,59 @@
+{
+  $schema: 'http://json-schema.org/draft-07/schema',
+  description: 'Schema for the `genomes` collection.',
+  version: 1,
+  type: 'object',
+  required: ['_key'],
+  properties: {
+    _key: {
+      type: 'string',
+      description: 'The RefSeq accession ID of this genome.',
+      examples: ['NC_008270.1']
+    },
+    kbase_workspace_ref: {
+      type: 'string',
+      description: 'A KBase workspace reference in the form "workspace_id/object_id/version",\
+        pointing to a Genome object ',
+      pattern: '^\d+\/\d+\/\d+',
+      examples: ['1/2/3']
+    },
+    annotation_data: {
+      type: 'object',
+      additionalProperties: true,
+      description: 'Data from NCBI about the annotation process, such as date, method, pipeline,\
+        provider, etc.'
+    },
+    comment: {
+      type: 'string',
+      description: 'Comment data pulled from the RefSeq annotation.'
+    },
+    data_file_division: {type: 'string', exmaples: ['CON']},
+    date: {
+      type: 'string',
+      description: 'Date of the annotation.',
+      format: 'date-time'
+    },
+    dbxrefs: {
+      type: 'array',
+      items: {type: 'string'},
+      description: 'List of database cross-reference IDs pulled from RefSeq in the form "dbname:objid".'
+    },
+    description: {
+      type: 'string',
+      description: "Plain-english description of this organism's annotation.",
+      examples: ['Rhodococcus jostii RHA1 plasmid pRHL2, complete sequence']
+    },
+    molecule_type: {type: 'string', examples: ['DNA']},
+    name: {type: 'string', examples: ['NC008270']},
+    organism_name: {type: 'string', examples: ['Rhodococcus jostii RHA1']},
+    sequence_version: {type: 'integer', minimum: 0},
+    source: {type: 'string', examples: 'Rhodococcus jostii RHA1'},
+    taxonomy: {
+      type: 'string',
+      description: 'Comma-separated list of taxa parents, pulled from NCBI.',
+      examples: ['Bacteria, Actinobacteria, Corynebacteriales, Nocardiaceae, Rhodococcus']
+    },
+    topology: {type: 'string', examples: ['linear']}
+  },
+  additionalProperties: false
+}
