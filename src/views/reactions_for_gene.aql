@@ -1,0 +1,10 @@
+// Fetch all the reactions for a specific gene
+// Arguments
+//   @gene_id - full ID of a gene to find reactions for (eg. "genes/XYZ_123")
+
+FOR comp_gene IN complex_has_gene
+    FILTER comp_gene._to == @gene_id
+    FOR complex IN gene_complexes
+        FILTER complex._id == comp_gene._from
+        FOR reaction IN 1..1 OUTBOUND complex complex_produces_reaction
+            RETURN DISTINCT reaction._id
