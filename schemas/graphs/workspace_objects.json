@@ -60,17 +60,22 @@
     "to": "types"
   },
   {
-    "edge": "was_created_with_module",
+    "edge": "created_with_module",
     "from": "ws_object_versions",
     "to": "sdk_module_versions"
   },
   {
-    "edge": "was_created_with_method",
+    "edge": "created_with_method",
     "from": "ws_object_versions",
-    "to": "sdk_module_method_versions"
+    "to": "sdk_module_method_versions",
+    "edgeSchema": {
+      "type": "object",
+      "required": ["method_params"],
+      "properties": {"method_params": {"type": "object"}}
+    }
   },
   {
-    "edge": "was_created_from_object",
+    "edge": "created_from_object",
     "from": "ws_object_versions",
     "to": "ws_object_versions"
   },
