@@ -1,0 +1,112 @@
+[
+  {
+    "edge": "is_latest_version_of",
+    "from": "sdk_module_versions",
+    "to": "sdk_modules"
+  },
+  {
+    "edge": "is_version_of",
+    "from": "sdk_module_versions",
+    "to": "sdk_modules"
+  },
+  {
+    "edge": "is_version_of",
+    "from": "type_versions",
+    "to": "types"
+  },
+  {
+    "edge": "is_latest_version_of",
+    "from": "type_versions",
+    "to": "types"
+  },
+  {
+    "edge": "is_latest_version_of",
+    "from": "sdk_module_method_versions",
+    "to": "sdk_module_methods"
+  },
+  {
+    "edge": "is_version_of",
+    "from": "sdk_module_method_versions",
+    "to": "sdk_module_methods"
+  },
+  {
+    "edge": "is_latest_version_of",
+    "from": "ws_object_versions",
+    "to": "ws_objects"
+  },
+  {
+    "edge": "is_version_of",
+    "from": "ws_object_versions",
+    "to": "ws_objects"
+  },
+  {
+    "edge": "contains_method",
+    "from": "sdk_module",
+    "to": "sdk_method"
+  },
+  {
+    "edge": "contains_method_version",
+    "from": "sdk_module_version",
+    "to": "sdk_module_method_version"
+  },
+  {
+    "edge": "contains_object",
+    "from": "workspaces",
+    "to": "ws_objects"
+  },
+  {
+    "edge": "contains_type",
+    "from": "type_modules",
+    "to": "types"
+  },
+  {
+    "edge": "was_created_with_module",
+    "from": "ws_object_versions",
+    "to": "sdk_module_versions"
+  },
+  {
+    "edge": "was_created_with_method",
+    "from": "ws_object_versions",
+    "to": "sdk_module_method_versions"
+  },
+  {
+    "edge": "was_created_from_object",
+    "from": "ws_object_versions",
+    "to": "ws_object_versions"
+  },
+  {
+    "edge": "refers_to",
+    "from": "ws_object_versions",
+    "to": "ws_object_versions"
+  },
+  {
+    "edge": "was_copied_from",
+    "from": "ws_object_versions",
+    "to": "ws_object_versions"
+  },
+  {
+    "edge": "is_owner_of",
+    "from": "users",
+    "to": "workspaces"
+  },
+  {
+    "edge": "can_read",
+    "from": "users",
+    "to": "workspaces"
+  },
+  {
+    "edge": "can_write",
+    "from": "users",
+    "to": "workspaces"
+  },
+  {
+    "edge": "has_hash",
+    "from": "ws_object_versions",
+    "to": "object_hashes"
+  },
+  {
+    "edge": "has_input_type",
+    "from": "types",
+    "to": "sdk_method_versions"
+  }
+]

@@ -1,0 +1,28 @@
+[
+  {
+    "edge": "is_similar_to",
+    "from": "reactions",
+    "to": "reactions",
+    "edgeSchema": {
+      "type": "object",
+      "required": ["jaccard_similarity"],
+      "properties": {
+        "jaccard_similarity": {
+          "type": "number",
+          "min": 0,
+          "max": 1
+        }
+      }
+    }
+  },
+  {
+    "edge": "contains",
+    "from": "gene_reaction_complexes",
+    "to": "features"
+  },
+  {
+    "edge": "produces",
+    "from": "gene_reaction_complexes",
+    "to": "chemical_reactions"
+  }
+]

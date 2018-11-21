@@ -1,0 +1,17 @@
+[
+  {
+    "edge": "contains",
+    "from": "genomes",
+    "to": "features"
+  },
+  {
+    "edge": "has_detail",
+    "from": "ws_object_versions",
+    "to": "genomes"
+  },
+  {
+    "edge": "published_in",
+    "from": "genomes",
+    "to": "publications"
+  }
+]

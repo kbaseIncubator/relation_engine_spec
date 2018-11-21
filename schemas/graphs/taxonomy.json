@@ -1,0 +1,7 @@
+[
+  {
+    "edge": "child_of",
+    "from": "taxa",
+    "to": "taxa"
+  }
+]

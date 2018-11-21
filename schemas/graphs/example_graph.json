@@ -1,0 +1,7 @@
+[
+  {
+    "edge": "example_edges",
+    "from": "example_vertices",
+    "to": "example_vertices"
+  }
+]
