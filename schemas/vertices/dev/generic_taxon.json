@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-xxx/schema#",
+  "type": "object",
+  "description": "Template for a vertex entry in the NCBI or GTDB taxonomy tree.",
+  "required": ["_key", "source", "scientific_name", "rank"],
+  "properties": {
+    "_key": {
+      "type": "string",
+      "description": "Taxon type abbreviation plus name",
+      "examples": ["d:Bacteria", "p:Firmicutes"]
+    },
+    "source": {
+      "type": "string",
+      "title": "Taxonomy source",
+      "examples": ["NCBI", "GTDB"]
+    },
+    "scientific_name": {
+      "type": "string",
+      "title": "Taxon name.",
+      "examples": ["Bacteria", "Firmicutes"]
+    },
+    "aliases": {
+      "type": "array",
+      "description": "Aliases",
+      "examples": [ 
+                    [ {"category": "authority", 
+                       "name": "Borreliella burgdorferi (Johnson et al. 1984) Adeolu and Gupta 2015"},
+                      {"category": "genbank common name", 
+                       "name":"Lyme disease spirochet"},
+                      {"category":"synonym", 
+                       "name":"Borrelia burgdorferi"} ],
+
+                    [ {"category": "common name",
+                       "name": "E. coli"},
+                      {"category": "authority", 
+                       "name", "\"Bacterium coli commune\" Escherich 1885"}
+                      {"category": "synonym",
+                       "name": "Bacterium coli" } ]
+                    ]
+                  ]
+      "items": {
+         "type": "object"
+      }
+    }
+    "rank": {
+      "type": "string",
+      "title": "Taxonomic rank",
+      "examples": ["Domain", "Phylum"]
+    }
+    "numeric_rank": {
+      "type": "integer",
+      "title": "Taxonomic level"
+    }
+    "NCBI_taxon_id": {
+      "type": "integer",
+      "title": "NCBI_taxon_id"
+    }
+    "genetic_code": {
+      "type": "integer",
+      "title": "genetic code"
+    }
+    "GTDB_metadata": {
+      "type": "object",
+      "title": "GTDB metadata",
+      "examples":  [
+                      {
+                       "total_gap_length": "0",
+                       "ssu_gg_blast_evalue": "0",
+                       "ncbi_wgs_master": "LHKW00000000.1",
+                       "checkm_marker_count": "1169",
+                       ....  yada yada
+                      }
+                   ]
+    }
+  }
+}

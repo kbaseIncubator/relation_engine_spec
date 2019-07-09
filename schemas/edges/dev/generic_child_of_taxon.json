@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-xxx/schema#",
+  "type": "object",
+  "required": ["_from", "_to", "source", "child_type"],
+  "description": "Edges which create the taxonomy tree for NCBI or GTDB taxons.",
+  "properties": {
+    "_from": {
+      "type": "string",
+      "description": "The child. A gtdb_taxon or gtdb_organism."
+    },
+    "_to": {
+      "type": "string",
+      "description": "The parent gtdb_taxon."
+    }
+    "source": {
+      "type": "string",
+      "description": "Taxonomy source",
+      "examples": [ "NCBI", "GTDB" ]
+    }
+    "child_type": {
+      "type": "string",
+      "description": "type of child node (taxon or organism)"
+      "enum":  [ "t", "o" ]
+    }
+  }
+}
+

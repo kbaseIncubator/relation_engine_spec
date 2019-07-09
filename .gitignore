@@ -11,3 +11,5 @@ tmp/*
 coverage_report/
 .coverage
 *.egg-info/
+
+*~
