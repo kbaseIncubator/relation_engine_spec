@@ -11,12 +11,12 @@
     "_to": {
       "type": "string",
       "description": "The parent gtdb_taxon."
-    }
+    },
     "source": {
       "type": "string",
       "description": "Taxonomy source",
       "examples": [ "NCBI", "GTDB" ]
-    }
+    },
     "child_type": {
       "type": "string",
       "description": "type of child node (taxon or organism)"
