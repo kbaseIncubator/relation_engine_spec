@@ -33,11 +33,11 @@
                     [ {"category": "common name",
                        "name": "E. coli"},
                       {"category": "authority", 
-                       "name", "\"Bacterium coli commune\" Escherich 1885"}
+                       "name": "\"Bacterium coli commune\" Escherich 1885"},
                       {"category": "synonym",
                        "name": "Bacterium coli" } ]
                     ]
-                  ]
+                  ],
       "items": {
          "type": "object"
       }
