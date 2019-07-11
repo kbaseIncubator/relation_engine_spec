@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "description": "Template for a vertex entry in the GTDB taxonomy tree.",
-  "required": ["_key", "source", "scientific_name", "rank"],
+  "required": ["_key", "scientific_name", "rank"],
   "properties": {
     "_key": {
       "type": "string",
