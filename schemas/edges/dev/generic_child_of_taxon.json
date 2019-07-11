@@ -19,7 +19,7 @@
     },
     "child_type": {
       "type": "string",
-      "description": "type of child node (taxon or organism)"
+      "description": "type of child node (taxon or organism)",
       "enum":  [ "t", "o" ]
     }
   }

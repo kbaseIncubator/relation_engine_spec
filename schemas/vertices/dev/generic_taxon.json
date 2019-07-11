@@ -37,7 +37,7 @@
                        "name": "Borreliella burgdorferi (Johnson et al. 1984) Adeolu and Gupta 2015",
                        "canonical": ["borreliella", "burgdorferi", "johnson", "adeolu", "gupta" ]},
                       {"category": "genbank common name", 
-                       "name":"Lyme disease spirochet"
+                       "name":"Lyme disease spirochet",
                        "canonical": ["lyme", "disease", "spirochet"] },
                       {"category":"synonym", 
                        "name":"Borrelia burgdorferi",
