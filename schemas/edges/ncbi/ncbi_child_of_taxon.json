@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-xxx/schema#",
-  "type": "object",
+  "type": "object",`
   "required": ["_from", "_to", "source", "child_type"],
   "description": "Edges which create the taxonomy tree for NCBI or GTDB taxons.",
   "properties": {
