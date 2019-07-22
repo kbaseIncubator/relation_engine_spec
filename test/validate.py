@@ -32,7 +32,7 @@ def validate_json_schemas():
     names = {}  # type: dict
     for path in glob.iglob('schemas/**/*.yaml', recursive=True):
         name = os.path.basename(path)
-        print(f'  validating {name}..')
+        print(f'  validating {path}..')
         with open(path) as fd:
             data = yaml.safe_load(fd)
         jsonschema.validate(data, schema_schema)
@@ -68,21 +68,43 @@ def validate_json_schemas():
     print('..all valid.')
 
 
-def validate_aql_syntax():
+stored_query_schema = {
+    'type': 'object',
+    'required': ['query', 'name'],
+    'properties': {
+        'name': {'type': 'string'},
+        'params': {'type': 'object'},
+        'query': {'type': 'string'}
+    }
+}
+
+
+def validate_stored_queries():
     """Validate the syntax of all the queries."""
-    # TODO check AQL syntax. Unsure how to do this without connecting to a running arango server :/
+    # AQL syntax itself can only be validated by a test against the RE API
     print('Validating AQL queries..')
     names = {}  # type: dict
-    for path in glob.iglob('views/**/*.aql', recursive=True):
-        name = os.path.basename(path)
+    for path in glob.iglob('stored_queries/**/*.yaml', recursive=True):
+        print(f'  validating {path}..')
+        with open(path) as fd:
+            data = yaml.safe_load(fd)
+        jsonschema.validate(data, stored_query_schema)
+        name = data['name']
         if names.get(name):
-            print('Duplicate queries named ' + name)
+            print(f'Duplicate queries named {name}')
             exit(1)
         else:
             names[name] = True
+        # Make sure `params` can be used as a JSON schema
+        if data.get('params'):
+            try:
+                jsonschema.validate({}, data['params'])
+            except ValidationError:
+                pass
+        print(f'✓ {path} is valid.')
     print('..all valid.')
 
 
 if __name__ == '__main__':
     validate_json_schemas()
-    validate_aql_syntax()
+    validate_stored_queries()

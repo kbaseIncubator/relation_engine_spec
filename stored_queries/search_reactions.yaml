@@ -1,0 +1,31 @@
+# Use ArangoSearch to search documents in the Reactions index. Returns documents by ascending id.
+name: search_reactions
+params:
+  type: object
+  properties:
+    search_text:
+      type: string
+      description: text to match to document fields
+    all_documents:
+      type: string
+      description: ignore the search_text and return all documents
+    include_obsolete:
+      type: boolean
+      description: should obsolete documents be included
+    offset:
+      type: integer
+      description: how many documents to skip
+    result_limit:
+      type: integer
+      description: Maximum documents to return
+query:
+  LET ws_ids = @ws_ids
+  FOR doc IN Reactions
+    SEARCH ANALYZER(PHRASE(doc.id, @search_text)
+                 OR PHRASE(doc.name, @search_text)
+                 OR PHRASE(doc.abbreviation, @search_text)
+                 OR PHRASE(doc.aliases, @search_text), 'text_en') OR @all_documents
+    FILTER @include_obsolete || doc.is_obsolete == 0
+    SORT doc.id
+    LIMIT @offset, @result_limit
+    RETURN doc
