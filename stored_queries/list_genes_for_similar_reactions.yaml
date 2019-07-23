@@ -20,7 +20,6 @@ params:
 
 query: |
   WITH rxn_reaction
-  LET ws_ids = @ws_ids
   LET start = @exclude_self ? 1 : 0
   LET rxns = (
       FOR v, e IN start..1

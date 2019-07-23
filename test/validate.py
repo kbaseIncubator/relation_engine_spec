@@ -1,11 +1,18 @@
 """
 Validate everything in this repo, such as syntax, structure, etc.
 """
+import sys
 import os
 import glob
 import yaml
 import jsonschema
+import requests
+import json
 from jsonschema.exceptions import ValidationError
+
+from test.helpers import get_config, wait_for_arangodb
+
+_CONF = get_config()
 
 # JSON schema for vertex and edge collection schemas found in /schema
 schema_schema = {
@@ -43,6 +50,8 @@ def validate_json_schemas():
         else:
             names[name] = True
         # Make sure it can be used as a JSON schema
+        # If the schema is invalid, a SchemaError will get raised
+        # Otherwise, the schema will work and a ValidationError will get raised (what we want)
         try:
             jsonschema.validate({}, data['schema'])
         except ValidationError:
@@ -80,8 +89,7 @@ stored_query_schema = {
 
 
 def validate_stored_queries():
-    """Validate the syntax of all the queries."""
-    # AQL syntax itself can only be validated by a test against the RE API
+    """Validate the structure and syntax of all the queries."""
     print('Validating AQL queries..')
     names = {}  # type: dict
     for path in glob.iglob('stored_queries/**/*.yaml', recursive=True):
@@ -97,14 +105,37 @@ def validate_stored_queries():
             names[name] = True
         # Make sure `params` can be used as a JSON schema
         if data.get('params'):
+            # Make sure it can be used as a JSON schema
+            # If the schema is invalid, a SchemaError will get raised
+            # Otherwise, the schema will work and a ValidationError will get raised (what we want)
             try:
                 jsonschema.validate({}, data['params'])
             except ValidationError:
                 pass
+        query = data['query']
+        # Parse the AQL query on arangodb
+        url = _CONF['db_url'] + '/_api/query'
+        resp = requests.post(url, data=json.dumps({'query': query}), auth=_CONF['db_auth'])
+        parsed = resp.json()
+        if parsed['error']:
+            _fatal(parsed['errorMessage'])
+        query_bind_vars = set(parsed['bindVars'])
+        params = set(data.get('params', {}).get('properties', {}).keys())
+        if params != query_bind_vars:
+            _fatal((f"Bind vars are invalid.\n"
+                    f"  Extra vars in query: {query_bind_vars - params}.\n"
+                    f"  Extra params in schema: {params - query_bind_vars}"))
         print(f'✓ {path} is valid.')
     print('..all valid.')
 
 
+def _fatal(msg):
+    """Fatal error."""
+    sys.stderr.write(str(msg) + '\n')
+    sys.exit(1)
+
+
 if __name__ == '__main__':
+    wait_for_arangodb()
     validate_json_schemas()
     validate_stored_queries()

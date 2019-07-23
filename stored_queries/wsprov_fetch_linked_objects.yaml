@@ -41,8 +41,8 @@ query: |
           FILTER (!@types || v.ws_type IN @types)
           FILTER (!@owners || v.owner IN @owners)
           FILTER (@show_private && @show_public)
-            ? (v.is_public || v.workspace_id IN @ws_ids)
-            : (!@show_private || v.workspace_id IN @ws_ids) && (!@show_public || v.is_public)
+            ? (v.is_public || v.workspace_id IN ws_ids)
+            : (!@show_private || v.workspace_id IN ws_ids) && (!@show_public || v.is_public)
           LIMIT @offset, @results_limit
           RETURN {
               vertex: {
@@ -66,8 +66,8 @@ query: |
           FILTER (!@types || v.ws_type IN @types)
           FILTER (!@owners || v.owner IN @owners)
           FILTER (@show_private && @show_public)
-            ? (v.is_public || v.workspace_id IN @ws_ids)
-            : (!@show_private || v.workspace_id IN @ws_ids) && (!@show_public || v.is_public)
+            ? (v.is_public || v.workspace_id IN ws_ids)
+            : (!@show_private || v.workspace_id IN ws_ids) && (!@show_public || v.is_public)
           LIMIT @offset, @results_limit
           RETURN {
               vertex: {

@@ -25,7 +25,7 @@ query: |
   FOR v, e, path IN 1..@max_depth
       ANY CONCAT('wsprov_object/', @start_key) wsprov_links
       OPTIONS {'uniqueVertices': 'path', 'uniqueEdges': 'path'}
-      FILTER (@show_private && @show_public) ? (v.is_public || v.workspace_id IN @ws_ids) :
-          (!@show_private || v.workspace_id IN @ws_ids) && (!@show_public || v.is_public)
+      FILTER (@show_private && @show_public) ? (v.is_public || v.workspace_id IN ws_ids) :
+          (!@show_private || v.workspace_id IN ws_ids) && (!@show_public || v.is_public)
       filter v._key == @end_key
       RETURN path

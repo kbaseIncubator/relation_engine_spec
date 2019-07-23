@@ -18,6 +18,6 @@ query: |
   for v, e, p in 1..100 inbound obj_id wsprov_links
       options {bfs: true, uniqueVertices: 'global'}   
       filter p.edges[*].type all == 'reference'
-      filter v.is_public || v.workspace_id IN @ws_ids
+      filter v.is_public || v.workspace_id IN ws_ids
       limit @offset, @result_limit
       return v

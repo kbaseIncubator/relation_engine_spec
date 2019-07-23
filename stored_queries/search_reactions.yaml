@@ -19,7 +19,6 @@ params:
       type: integer
       description: Maximum documents to return
 query: |
-  LET ws_ids = @ws_ids
   FOR doc IN Reactions
     SEARCH ANALYZER(PHRASE(doc.id, @search_text)
                  OR PHRASE(doc.name, @search_text)

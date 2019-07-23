@@ -29,8 +29,8 @@ query: |
           INBOUND CONCAT('wsprov_object/', @key) wsprov_links
           OPTIONS {'uniqueVertices': 'global', 'bfs':true}
           // If both show_private and show_public, return if either is true
-          FILTER (@show_private && @show_public) ? (v.is_public || v.workspace_id IN @ws_ids) :
-              (!@show_private || v.workspace_id IN @ws_ids) && (!@show_public || v.is_public)
+          FILTER (@show_private && @show_public) ? (v.is_public || v.workspace_id IN ws_ids) :
+              (!@show_private || v.workspace_id IN ws_ids) && (!@show_public || v.is_public)
           FILTER (!@owners || v.owner IN @owners)
           return v
   )

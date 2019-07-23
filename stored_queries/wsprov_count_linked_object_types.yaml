@@ -33,8 +33,8 @@ query: |
           FILTER (!@type || v.ws_type == @type)
           FILTER (!@owners || v.owner IN @owners)
           FILTER (@show_private && @show_public)
-            ? (v.is_public || v.workspace_id IN @ws_ids)
-            : (!@show_private || v.workspace_id IN @ws_ids) && (!@show_public || v.is_public)
+            ? (v.is_public || v.workspace_id IN ws_ids)
+            : (!@show_private || v.workspace_id IN ws_ids) && (!@show_public || v.is_public)
           COLLECT type = v.ws_type with count into type_count
           RETURN {type, type_count}
   )
@@ -46,8 +46,8 @@ query: |
           FILTER (!@type || v.ws_type == @type)
           FILTER (!@owners || v.owner IN @owners)
           FILTER (@show_private && @show_public)
-            ? (v.is_public || v.workspace_id IN @ws_ids)
-            : (!@show_private || v.workspace_id IN @ws_ids) && (!@show_public || v.is_public)
+            ? (v.is_public || v.workspace_id IN ws_ids)
+            : (!@show_private || v.workspace_id IN ws_ids) && (!@show_public || v.is_public)
           COLLECT type = v.ws_type with count into type_count
           RETURN {type, type_count}
   )
