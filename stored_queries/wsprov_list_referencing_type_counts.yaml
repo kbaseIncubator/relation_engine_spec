@@ -11,17 +11,22 @@ params:
     show_private:
       type: boolean
       description: if present, limit to objects in workspaces that a user has access to
+      default: true
     show_public:
       type: boolean
       description: if present, limit to objects in public workspaces
+      default: true
     owners:
-      type: array
-      items:
-        type: string
       description: if present, limit to objects with owner in list
+      default: null
+      anyOf:
+        - {type: 'null'}
+        - type: array
+          items: {type: string}
     simplify_type:
       type: boolean
       description: if true, strip out the module and version before collecting
+      default: false
 query: |
   WITH wsprov_object
   LET ws_objects = (
@@ -34,7 +39,6 @@ query: |
           FILTER (!@owners || v.owner IN @owners)
           return v
   )
-
   LET types = (
       FOR v in ws_objects
           LET ws_type = @simplify_type ? SPLIT(SPLIT(v.ws_type, '-', 1)[0], '.')[1] : v.ws_type

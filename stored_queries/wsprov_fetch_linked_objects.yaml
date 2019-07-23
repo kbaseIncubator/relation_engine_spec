@@ -11,23 +11,31 @@ params:
     show_private:
       type: boolean
       description: limit to objects in workspaces that a user has access to
+      default: true
     show_public:
       type: boolean
       description: limit to objects in public workspaces
+      default: true
     types:
-      type: array
-      items:
-        type: string
-      description: list of ws types to filter on (set as false to disable)
+      description: list of ws types to filter on (set as null to disable)
+      default: null
+      anyOf:
+        - {type: 'null'}
+        - type: array
+          items: {type: string}
     owners:
-      type: array
-      items:
-        type: string
-      description: list of usernames to filter by owner (set as false to disable)
+      description: list of usernames to filter by owner (set as null to disable)
+      default: null
+      anyOf:
+        - {type: 'null'}
+        - type: array
+          items: {type: string}
     results_limit:
+      default: 10
       type: integer
       description: limit of total results
     offset:
+      default: 0
       type: integer
       description: result offset
 query: |

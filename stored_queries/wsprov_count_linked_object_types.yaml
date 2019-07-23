@@ -7,21 +7,26 @@ params:
   properties:
     obj_key:
       type: string
-      description: Key of th wsprov_object to search on
+      description: Key of the wsprov_object to search on
     show_private:
       type: boolean
       description: limit to objects in workspaces that a user has access to
+      default: true
     show_public:
       type: boolean
       description: limit to objects in public workspaces
+      default: true
     type:
       type: string
       description: WS type to filter on
     owners:
-      type: array
-      items:
-        type: string
+      default: null
       description: Array of usernames to filter by owner
+      anyOf:
+        - {type: "null"}
+        - type: array
+          items:
+            type: string
 query: |
   WITH wsprov_object
   LET obj_id = concat('wsprov_object/', @obj_key)

@@ -3,7 +3,7 @@
 name: wsprov_fetch_paths_between_objects
 params:
   type: object
-  required: [start_key, end_key, max_depth]
+  required: [start_key, end_key]
   properties:
     start_key: 
       type: string
@@ -14,10 +14,13 @@ params:
     show_private: 
       type: boolean
       description: if present, limit to objects in workspaces that a user has access to
+      default: true
     show_public: 
       type: boolean
       description: if present, limit to objects in public workspaces
+      default: true
     max_depth: 
+      default: 10
       type: integer
       description: longest path to explore
 query: |

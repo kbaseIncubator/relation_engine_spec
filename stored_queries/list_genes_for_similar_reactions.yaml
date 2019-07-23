@@ -4,6 +4,7 @@ name: list_genes_for_similar_reactions
 
 params:
   type: object
+  required: [sf_sim, df_sim, rid]
   properties:
     rid:
       type: string
@@ -17,6 +18,7 @@ params:
     exclude_self:
       type: boolean
       description: If true, don't include the query reactions genes
+      default: false
 
 query: |
   WITH rxn_reaction

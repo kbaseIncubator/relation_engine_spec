@@ -13,20 +13,27 @@ params:
     show_private:
       type: boolean
       description: limit to objects in workspaces that a user has access to
+      default: true
     show_public:
       type: boolean
       description: limit to objects in public workspaces
+      default: true
     result_limit:
+      default: 10
       type: integer
       description: result limit
     offset:
+      default: 0
       type: integer
       description: result offset
     types:
+      default: null
       description: Optional array of WS types to filter on
-      type: array
-      items:
-        type: string
+      anyOf:
+        - {type: 'null'}
+        - type: array
+          items:
+            type: string
 query: |
   WITH wsprov_object
   LET obj_id = CONCAT('wsprov_object/', @obj_key)

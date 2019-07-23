@@ -2,6 +2,7 @@
 name: wsprov_fetch_object
 params:
   type: object
+  required: [key]
   properties:
     key:
       type: string
