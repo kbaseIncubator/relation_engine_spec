@@ -36,7 +36,7 @@ schema_schema = {
 def validate_json_schemas():
     """Validate the syntax of all the JSON schemas."""
     print('Validating JSON schemas..')
-    names = {}  # type: dict
+    names = set()  # type: set
     for path in glob.iglob('schemas/**/*.yaml', recursive=True):
         name = os.path.basename(path)
         print(f'  validating {path}..')
@@ -44,11 +44,11 @@ def validate_json_schemas():
             data = yaml.safe_load(fd)
         jsonschema.validate(data, schema_schema)
         # Check for any duplicate schema names
-        if names.get(name):
+        if name in names:
             print('Duplicate schemas for name ' + name)
             exit(1)
         else:
-            names[name] = True
+            names.add(name)
         # Make sure it can be used as a JSON schema
         # If the schema is invalid, a SchemaError will get raised
         # Otherwise, the schema will work and a ValidationError will get raised (what we want)
@@ -91,18 +91,18 @@ stored_query_schema = {
 def validate_stored_queries():
     """Validate the structure and syntax of all the queries."""
     print('Validating AQL queries..')
-    names = {}  # type: dict
+    names = set()  # type: set
     for path in glob.iglob('stored_queries/**/*.yaml', recursive=True):
         print(f'  validating {path}..')
         with open(path) as fd:
             data = yaml.safe_load(fd)
         jsonschema.validate(data, stored_query_schema)
         name = data['name']
-        if names.get(name):
+        if name in names:
             print(f'Duplicate queries named {name}')
             exit(1)
         else:
-            names[name] = True
+            names.add(name)
         # Make sure `params` can be used as a JSON schema
         if data.get('params'):
             # Make sure it can be used as a JSON schema

@@ -1,6 +1,7 @@
 """
 Test helpers
 """
+import os
 import time
 import requests
 import functools
@@ -10,14 +11,15 @@ import functools
 def get_config():
     """Return configuration data for tests."""
     return {
-        'db_url': 'http://arangodb:8529',
-        'db_auth': ('root', '')
+        'db_url': os.environ['DB_URL'],
+        'db_auth': (os.environ['DB_USER'], os.environ.get('DB_PASS', ''))
     }
 
 
 def wait_for_arangodb():
     """Wait for arangodb to go live."""
-    db_url = 'http://arangodb:8529'
+    conf = get_config()
+    db_url = conf['db_url']
     auth = ('root', '')
     timeout = time.time() + 60
     while True:
