@@ -1,5 +1,6 @@
 # Get the array of descendants for any taxon
 # Defaults to immediate children only
+# Results are limited to at most 10000 documents
 name: ncbi_taxon_get_descendants
 params:
   type: object
