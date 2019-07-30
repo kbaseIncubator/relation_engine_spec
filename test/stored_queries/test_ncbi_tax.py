@@ -113,7 +113,6 @@ class TestNcbiTax(unittest.TestCase):
             _CONF['re_api_url'] + '/api/v1/query_results',
             params={'stored_query': 'ncbi_taxon_get_siblings'},
             data=json.dumps({'key': '5'}),  # Querying from "Alphaproteobacteria"
-            headers={'Authorization': 'valid_token'}  # gives access to workspaces [1,2,3]
         ).json()
         self.assertEqual(resp['count'], 2)
         ranks = {r['rank'] for r in resp['results']}
