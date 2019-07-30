@@ -17,7 +17,7 @@ query: |
       for p in 1..1 OUTBOUND t ncbi_child_of_taxon
         return p._id
   )
-  // Get all siblings from the parent
+  // Get all children from the parent, filter out @key
   for p in ncbi_taxon
     filter p._id == parent_id
     for c in 1..1 INBOUND p ncbi_child_of_taxon
