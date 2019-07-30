@@ -18,4 +18,5 @@ query: |
   for t in ncbi_taxon
       filter t._key == @key
       for c in 1..@levels INBOUND t ncbi_child_of_taxon
+          limit 10000
           return c
