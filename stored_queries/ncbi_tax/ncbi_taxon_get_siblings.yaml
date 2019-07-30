@@ -1,0 +1,15 @@
+# Get the array of siblings for a taxon
+name: ncbi_taxon_get_siblings
+params:
+  type: object
+  required: [key]
+  properties:
+    key:
+      type: string
+      title: Document key
+      description: Key of the taxon vertex for which you want to find descendants
+query: |
+  for t in ncbi_taxon
+      filter t._key == @key
+      for c in 1..@levels INBOUND t ncbi_child_of_taxon
+          return c
