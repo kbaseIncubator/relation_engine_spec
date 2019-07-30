@@ -1,4 +1,5 @@
 # Get the array of siblings for a taxon
+# Results are limited to 10k
 name: ncbi_taxon_get_siblings
 params:
   type: object
@@ -7,9 +8,19 @@ params:
     key:
       type: string
       title: Document key
-      description: Key of the taxon vertex for which you want to find descendants
+      description: Key of the taxon vertex for which you want to find siblings
 query: |
-  for t in ncbi_taxon
+  // First get the id of the parent node
+  let parent_id = FIRST(
+    for t in ncbi_taxon
       filter t._key == @key
-      for c in 1..@levels INBOUND t ncbi_child_of_taxon
-          return c
+      for p in 1..1 OUTBOUND t ncbi_child_of_taxon
+        return p._id
+  )
+  // Get all siblings from the parent
+  for p in ncbi_taxon
+    filter p._id == parent_id
+    for c in 1..1 INBOUND p ncbi_child_of_taxon
+      filter c._key != @key
+      limit 10000
+      return c
