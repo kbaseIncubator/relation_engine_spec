@@ -146,16 +146,6 @@ class TestNcbiTax(unittest.TestCase):
         ).json()
         self.assertEqual(resp['count'], 1)
 
-    def test_search_sciname_valid(self):
-        """Test a query to search sciname."""
-        resp = requests.post(
-            _CONF['re_api_url'] + '/api/v1/query_results',
-            params={'stored_query': 'ncbi_taxon_search_sci_name'},
-            data=json.dumps({'search_text': 'prefix:bact'}),
-        ).json()
-        self.assertEqual(resp['count'], 1)
-        self.assertEqual(resp['results'][0]['scientific_name'], 'Bacteria')
-
     def test_search_sciname_nonexistent(self):
         """Test a query to search sciname."""
         resp = requests.post(
