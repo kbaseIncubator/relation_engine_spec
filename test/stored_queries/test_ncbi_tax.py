@@ -165,6 +165,16 @@ class TestNcbiTax(unittest.TestCase):
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(resp.json()['error'], "123 is not of type 'string'")
 
+    def test_search_sciname_missing_search(self):
+        """Test a query to search sciname."""
+        resp = requests.post(
+            _CONF['re_api_url'] + '/api/v1/query_results',
+            params={'stored_query': 'ncbi_taxon_search_sci_name'},
+            data=json.dumps({})
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json()['error'], "'search_text' is a required property")
+
     def test_search_sciname_more_complicated(self):
         """Test a query to search sciname."""
         resp = requests.post(
@@ -173,6 +183,5 @@ class TestNcbiTax(unittest.TestCase):
             data=json.dumps({'search_text': "prefix:gamma,|prefix:alpha,|prefix:delta"})
         ).json()
         self.assertEqual(resp['count'], 3)
-        names = [r['scientific_name'] for r in resp['results']]
-        self.assertEqual(names, ['Gammaproteobacteria', 'Alphaproteobacteria', 'Deltaproteobacteria'])
-        print('resp!', resp)
+        names = {r['scientific_name'] for r in resp['results']}
+        self.assertEqual(names, {'Gammaproteobacteria', 'Alphaproteobacteria', 'Deltaproteobacteria'})
