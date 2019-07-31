@@ -136,3 +136,53 @@ class TestNcbiTax(unittest.TestCase):
             data=json.dumps({'key': 'xyz'}),  # Nonexistent node
         ).json()
         self.assertEqual(resp['count'], 0)
+
+    def test_search_sciname_prefix(self):
+        """Test a query to search sciname."""
+        resp = requests.post(
+            _CONF['re_api_url'] + '/api/v1/query_results',
+            params={'stored_query': 'ncbi_taxon_search_sci_name'},
+            data=json.dumps({'search_text': 'prefix:bact'}),
+        ).json()
+        self.assertEqual(resp['count'], 1)
+
+    def test_search_sciname_valid(self):
+        """Test a query to search sciname."""
+        resp = requests.post(
+            _CONF['re_api_url'] + '/api/v1/query_results',
+            params={'stored_query': 'ncbi_taxon_search_sci_name'},
+            data=json.dumps({'search_text': 'prefix:bact'}),
+        ).json()
+        self.assertEqual(resp['count'], 1)
+        self.assertEqual(resp['results'][0]['scientific_name'], 'Bacteria')
+
+    def test_search_sciname_nonexistent(self):
+        """Test a query to search sciname."""
+        resp = requests.post(
+            _CONF['re_api_url'] + '/api/v1/query_results',
+            params={'stored_query': 'ncbi_taxon_search_sci_name'},
+            data=json.dumps({'search_text': 'xyzabc'}),
+        ).json()
+        self.assertEqual(resp['count'], 0)
+
+    def test_search_sciname_wrong_type(self):
+        """Test a query to search sciname."""
+        resp = requests.post(
+            _CONF['re_api_url'] + '/api/v1/query_results',
+            params={'stored_query': 'ncbi_taxon_search_sci_name'},
+            data=json.dumps({'search_text': 123})
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json()['error'], "123 is not of type 'string'")
+
+    def test_search_sciname_more_complicated(self):
+        """Test a query to search sciname."""
+        resp = requests.post(
+            _CONF['re_api_url'] + '/api/v1/query_results',
+            params={'stored_query': 'ncbi_taxon_search_sci_name'},
+            data=json.dumps({'search_text': "prefix:gamma,|prefix:alpha,|prefix:delta"})
+        ).json()
+        self.assertEqual(resp['count'], 3)
+        names = [r['scientific_name'] for r in resp['results']]
+        self.assertEqual(names, ['Gammaproteobacteria', 'Alphaproteobacteria', 'Deltaproteobacteria'])
+        print('resp!', resp)
