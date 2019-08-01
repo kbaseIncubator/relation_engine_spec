@@ -1,5 +1,5 @@
 # Search for an ncbi taxon with a scientific name
-# Results are limited to 10k
+# Offset is limited to 10k
 name: ncbi_taxon_search_sci_name
 params:
   type: object
@@ -12,6 +12,7 @@ params:
     offset:
       type: integer
       default: 0
+      maximum: 10000
     limit:
       type: integer
       default: 20
