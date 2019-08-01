@@ -1,0 +1,10 @@
+name: goont_vert
+type: edge
+schema:
+  "$schema": http://json-schema.org/draft-07/schema#
+  type: object
+  required: [key]
+  description: Ontology party
+  properties:
+    _key:
+      type: string
