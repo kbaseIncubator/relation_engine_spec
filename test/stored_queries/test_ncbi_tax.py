@@ -145,6 +145,7 @@ class TestNcbiTax(unittest.TestCase):
             data=json.dumps({'search_text': 'prefix:bact'}),
         ).json()
         self.assertEqual(resp['count'], 1)
+        self.assertEqual(resp['results'][0]['scientific_name'], 'Bacteria')
 
     def test_search_sciname_nonexistent(self):
         """Test a query to search sciname."""
