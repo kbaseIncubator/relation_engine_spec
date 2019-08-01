@@ -2,7 +2,7 @@ name: ncbi_taxon
 type: vertex
 
 indexes:
-  fulltext:
+  - type: fulltext
     fields: [scientific_name]
 
 schema:
