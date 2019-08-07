@@ -23,7 +23,6 @@ query: |
       filter t._key == @key
       for c in 1..1 INBOUND t ncbi_child_of_taxon
         sort c.scientific_name asc
-        filter c.rank != 'no rank'
         limit @offset, @limit
         return c
 

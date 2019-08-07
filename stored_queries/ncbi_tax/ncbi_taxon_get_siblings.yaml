@@ -28,7 +28,6 @@ query: |
       // Then traverse back down to the siblings
       for c in 1..1 INBOUND parent ncbi_child_of_taxon
         filter c != t
-        filter c.rank != 'no rank'
         sort c.scientific_name asc
         limit @offset, @limit
         return c

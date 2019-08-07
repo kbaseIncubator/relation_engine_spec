@@ -17,5 +17,6 @@ query: |
         filter p.rank != 'no rank'
         return distinct p
   )
-  for d in reverse(ps)
-    return d
+  // doing return reverse(ps) returns an array of an array for some reason,
+  // which we don't want
+  for d in reverse(ps) return d
