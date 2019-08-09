@@ -18,6 +18,13 @@ params:
       default: 20
       maximum: 1000
 query: |
-  FOR doc in FULLTEXT(ncbi_taxon, "scientific_name", @search_text)
-    LIMIT @offset, @limit
-    RETURN doc
+   let results = (
+     FOR doc in FULLTEXT(ncbi_taxon, "scientific_name", @search_text)
+       return doc
+   )
+   let limited = (
+     for r in results
+       limit @offset, @limit
+       return r
+   )
+   return  {results: limited, total_count: COUNT(results)}
