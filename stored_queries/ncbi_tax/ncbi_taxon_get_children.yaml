@@ -20,11 +20,13 @@ params:
       maximum: 100000
 query: |
   let tax_id = CONCAT("ncbi_taxon/", @key)
+  // Fetch the child IDs using the edge attributes
   let child_ids = (
       for e in ncbi_child_of_taxon
         filter e._to == tax_id
         return e._from
   )
+  // Sort and filter the children
   let sorted = (
       for tax in ncbi_taxon
         sort tax.scientific_name asc

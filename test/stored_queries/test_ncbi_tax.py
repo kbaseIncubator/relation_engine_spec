@@ -97,9 +97,6 @@ class TestNcbiTax(unittest.TestCase):
             params={'stored_query': 'ncbi_taxon_get_siblings'},
             data=json.dumps({'key': '5'}),  # Querying from "Alphaproteobacteria"
         ).json()
-        print('\n' + '*' * 80)
-        print('results', resp)
-        print('*' * 80 + '\n')
         result = resp['results'][0]
         self.assertEqual(result['total_count'], 2)
         ranks = {r['rank'] for r in result['results']}
