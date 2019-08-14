@@ -4,7 +4,7 @@ schema:
   "$schema": http://json-schema.org/draft-07/schema#
   type: object
   required: [_from, _to, assigned_by]
-  description: The _from WS versioned object is associated with the _to taxon module.
+  description: The _from WS versioned object is associated with the _to taxon.
   properties:
     assigned_by:
       type: string
