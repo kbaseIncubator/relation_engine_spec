@@ -1,4 +1,4 @@
-# Get the taxon vertex associated with a versioned workspace object
+# Get the workspace objects associated with a taxon
 
 name: ncbi_taxon_get_associated_ws_objects
 
