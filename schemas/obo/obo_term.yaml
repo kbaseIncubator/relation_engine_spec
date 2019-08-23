@@ -20,6 +20,7 @@ schema:
       examples: ["cellular component", "biological process", "molecular function"]
     alt_id:
       type: array
+      items: {type: string}
       description: Defines an alternative ID for this term. A term may have any number of alternative ids.
       examples: [["GO:0019952", "GO:0050876"], ["GO:0044848"]]
     def:
@@ -80,5 +81,6 @@ schema:
       examples: [usernamexyz]
     creation_date:
       type: string
+      format: date-time
       description: Optional tag added by OBO-Edit to indicate the creation time and date of the term
       examples: ['2009-04-28T10:33:25Z']
