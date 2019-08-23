@@ -1,0 +1,24 @@
+name: obo_has_relationship
+type: edge
+schema:
+  "$schema": http://json-schema.org/draft-07/schema#
+  description: The `from` obo term has a relationship to the `to` obo term
+  type: object
+  required: [id, from, to, relationship_type]
+  properties:
+    id:
+      type: string
+      description: Has the format of 'from_term_id::to_term_id::relationship_name'
+      examples: ["GO:0000136::GO:0031501::part_of", "GO:0000132::GO:0000278::has_part"]
+    from:
+      type: string
+      description: GO id
+      examples: ["GO:0023052"]
+    to:
+      type: string
+      title: GO id
+      examples: ["GO:0008150"]
+    type:
+      type: string
+      title: Relationship type
+      examples: [occurs_in, has_part, part_of]
