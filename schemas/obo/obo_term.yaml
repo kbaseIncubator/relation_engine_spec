@@ -23,11 +23,18 @@ schema:
       description: Defines an alternative ID for this term. A term may have any number of alternative ids.
       examples: [["GO:0019952", "GO:0050876"], ["GO:0044848"]]
     def:
-      type: string
+      type: object
       title: Definition
       examples:
-      - "'The directed movement of a ribosomal subunit from the nucleus into the cytoplasm.' [GOC:ai]"
-      - "'Catalysis of the reaction: adenine + H2O = hypoxanthine + NH3.' [EC:3.5.4.2]"
+        - {"val": "The directed movement of a ribosomal subunit from the nucleus into the cytoplasm.", "xrefs": ["GOC:ai"]}
+        - {"val": "Catalysis of the reaction: adenine + H2O = hypoxanthine + NH3.", "xrefs": ["EC:3.5.4.2"]}
+      required: [val, xrefs]
+      additionalProperties: false
+      properties:
+        val: {type: string}
+        xrefs:
+          type: array
+          items: {type: string}
     comment:
       type: string
       examples:
@@ -35,14 +42,15 @@ schema:
         a biological process rather than a molecular function.
     subset:
       type: array
+      items: {type: string}
       description: This tag indicates a term subset to which this term belongs.
       examples:
         - [goslim_yeast]
         - [goslim_chembl, goslim_metagenomics, goslim_pir, goslim_plant]
     synonym:
       type: array
-      description: This tag gives a synonym for this term, some xrefs to describe the
-        origins of the synonym, and may indicate a synonym category or scope information.
+      description: Synonyms for this term with category or scope information. Also has database cross-references to describe the
+        origins of the synonym.
       examples:
         - [{"pred": "hasExactSynonym", "val": "cellular component", "xrefs": []}]
         - [{"pred": "hasRelatedSynonym", "val": "subcellular entity", "xrefs": ["NIF_Subcellular:nlx_subcell_100315"]}]
