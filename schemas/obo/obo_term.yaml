@@ -56,9 +56,9 @@ schema:
           xrefs:
             type: array
             items: {type: string}
-    xref:
+    xrefs:
       type: array
-      description: A database cross-reference that describes an analagous term in another vocabulary
+      description: Database cross-references that describe analagous terms in another vocabulary
       examples: [["Wikipedia:Reproduction"], ["KEGG_REACTION:R05612", "RHEA:20836"], ["GO:0042254", "GO:0008104", "GO:0051019"]]
       items: {type: string}
     is_obsolete:
