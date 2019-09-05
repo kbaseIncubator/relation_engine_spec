@@ -71,7 +71,7 @@ class TestNcbiTax(unittest.TestCase):
             {'_from': 'ws_object_version/1:1:2', '_to': 'ncbi_taxon/1', 'assigned_by': 'assn2'},
             {'_from': 'ws_object_version/2:1:1', '_to': 'ncbi_taxon/1', 'assigned_by': 'assn2'},
         ]
-        ws_docs = [{'_key': '1', 'is_public': True}, {'_key': '1', 'is_public': False}]
+        ws_docs = [{'_key': '1', 'is_public': True}, {'_key': '2', 'is_public': False}]
         ws_to_obj = [
             {'_from': 'ws_workspace/1', '_to': 'ws_object_version/1:1:1'},
             {'_from': 'ws_workspace/1', '_to': 'ws_object_version/1:1:2'},
