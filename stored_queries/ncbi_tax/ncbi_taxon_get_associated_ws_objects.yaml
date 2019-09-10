@@ -25,7 +25,7 @@ query: |
   let count = COUNT(
     for tax in ncbi_taxon
       filter tax.id == @taxon_id
-      sort tax.expired desc
+      filter tax.expired == 9007199254740991
       limit 1
       for obj in 1..1 inbound tax ws_obj_version_has_taxon
         return 1
@@ -33,7 +33,7 @@ query: |
   let results = (
     for tax in ncbi_taxon
       filter tax.id == @taxon_id
-      sort tax.expired desc
+      filter tax.expired == 9007199254740991
       limit 1
       for obj, e in 1..1 inbound tax ws_obj_version_has_taxon
         filter obj.is_public or obj.workspace_id IN ws_ids
