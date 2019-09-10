@@ -22,6 +22,8 @@ query: |
   // Don't limit the results yet so we can get the total_count below
   let results = (
     FOR doc in FULLTEXT(ncbi_taxon, "scientific_name", @search_text)
+      // Filter non-expired docs
+      filter doc.expired == 9007199254740991
       return doc
   )
   // Limit the results

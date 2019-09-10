@@ -2,13 +2,14 @@
 name: ncbi_fetch_taxon
 params:
   type: object
-  required: [key]
+  required: [id]
   properties:
-    key:
+    id:
       type: string
-      title: Document key
-      description: Taxonomy ID (document _key) for the taxon to fetch
+      title: NCBI Taxonomy ID
 query: |
   for t in ncbi_taxon
-      filter t._key == @key
+      filter t.id == @id
+      filter t.expired == 9007199254740991
+      limit 1
       return t

@@ -36,6 +36,9 @@ def _create_delta_test_docs(coll_name, docs, edge=False):
     else:
         for doc in docs:
             doc['id'] = doc['_key']
+    for doc in docs:
+        doc['expired'] = 9007199254740991
+        doc['created'] = 0
     create_test_docs(coll_name, docs)
 
 
@@ -71,6 +74,7 @@ class TestNcbiTax(unittest.TestCase):
             {'_from': 'ws_object_version/1:1:2', '_to': 'ncbi_taxon/1', 'assigned_by': 'assn2'},
             {'_from': 'ws_object_version/2:1:1', '_to': 'ncbi_taxon/1', 'assigned_by': 'assn2'},
         ]
+        # Create workspace objects associated to taxa
         ws_docs = [{'_key': '1', 'is_public': True}, {'_key': '2', 'is_public': False}]
         ws_to_obj = [
             {'_from': 'ws_workspace/1', '_to': 'ws_object_version/1:1:1'},
@@ -89,7 +93,7 @@ class TestNcbiTax(unittest.TestCase):
         resp = requests.post(
             _CONF['re_api_url'] + '/api/v1/query_results',
             params={'stored_query': 'ncbi_taxon_get_lineage'},
-            data=json.dumps({'key': '7'}),
+            data=json.dumps({'id': '7'}),
         ).json()
         self.assertEqual(resp['count'], 2)
         ranks = [r['rank'] for r in resp['results']]
@@ -102,7 +106,7 @@ class TestNcbiTax(unittest.TestCase):
         resp = requests.post(
             _CONF['re_api_url'] + '/api/v1/query_results',
             params={'stored_query': 'ncbi_taxon_get_children'},
-            data=json.dumps({'key': '1', 'search_text': 'firmicutes,|proteobacteria'}),
+            data=json.dumps({'id': '1', 'search_text': 'firmicutes,|proteobacteria'}),
         ).json()
         result = resp['results'][0]
         self.assertEqual(result['total_count'], 2)
@@ -116,7 +120,7 @@ class TestNcbiTax(unittest.TestCase):
         resp = requests.post(
             _CONF['re_api_url'] + '/api/v1/query_results',
             params={'stored_query': 'ncbi_taxon_get_children_cursor'},
-            data=json.dumps({'key': '1'})
+            data=json.dumps({'id': '1'})
         ).json()
         self.assertEqual(len(resp['results']), 2)
 
@@ -125,7 +129,7 @@ class TestNcbiTax(unittest.TestCase):
         resp = requests.post(
             _CONF['re_api_url'] + '/api/v1/query_results',
             params={'stored_query': 'ncbi_taxon_get_siblings'},
-            data=json.dumps({'key': '5'}),  # Querying from "Alphaproteobacteria"
+            data=json.dumps({'id': '5'}),  # Querying from "Alphaproteobacteria"
         ).json()
         result = resp['results'][0]
         self.assertEqual(result['total_count'], 2)
@@ -139,7 +143,7 @@ class TestNcbiTax(unittest.TestCase):
         resp = requests.post(
             _CONF['re_api_url'] + '/api/v1/query_results',
             params={'stored_query': 'ncbi_taxon_get_siblings'},
-            data=json.dumps({'key': '1'}),  # Querying from "Bacteria"
+            data=json.dumps({'id': '1'}),  # Querying from "Bacteria"
         ).json()
         self.assertEqual(resp['results'][0]['total_count'], 0)
 
@@ -148,7 +152,7 @@ class TestNcbiTax(unittest.TestCase):
         resp = requests.post(
             _CONF['re_api_url'] + '/api/v1/query_results',
             params={'stored_query': 'ncbi_taxon_get_siblings'},
-            data=json.dumps({'key': 'xyz'}),  # Nonexistent node
+            data=json.dumps({'id': 'xyz'}),  # Nonexistent node
         ).json()
         self.assertEqual(resp['results'][0]['total_count'], 0)
 
@@ -229,7 +233,7 @@ class TestNcbiTax(unittest.TestCase):
         resp = requests.post(
             _CONF['re_api_url'] + '/api/v1/query_results',
             params={'stored_query': 'ncbi_fetch_taxon'},
-            data=json.dumps({'key': '1'})
+            data=json.dumps({'id': '1'})
         ).json()
         self.assertEqual(resp['count'], 1)
         self.assertEqual(resp['results'][0]['_id'], 'ncbi_taxon/1')
@@ -242,7 +246,7 @@ class TestNcbiTax(unittest.TestCase):
         resp = requests.post(
             _CONF['re_api_url'] + '/api/v1/query_results',
             params={'stored_query': 'ncbi_taxon_get_associated_ws_objects'},
-            data=json.dumps({'id': 'ncbi_taxon/1'}),
+            data=json.dumps({'taxon_id': '1'}),
         ).json()
         self.assertEqual(resp['count'], 1)
         results = resp['results'][0]
