@@ -3,7 +3,7 @@
 name: ncbi_taxon_get_siblings
 params:
   type: object
-  required: [id]
+  required: [id, ts]
   properties:
     id:
       type: string

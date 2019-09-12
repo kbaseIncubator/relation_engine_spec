@@ -3,7 +3,7 @@
 name: ncbi_taxon_search_sci_name
 params:
   type: object
-  required: [search_text]
+  required: [search_text, ts]
   properties:
     search_text:
       type: string

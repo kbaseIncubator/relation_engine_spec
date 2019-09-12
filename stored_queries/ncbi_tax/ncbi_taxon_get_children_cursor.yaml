@@ -2,7 +2,7 @@
 name: ncbi_taxon_get_children_cursor
 params:
   type: object
-  required: [id]
+  required: [id, ts]
   properties:
     id:
       type: string

@@ -2,7 +2,7 @@
 name: ncbi_taxon_get_children
 params:
   type: object
-  required: [id]
+  required: [id, ts]
   properties:
     id:
       type: string
@@ -31,10 +31,12 @@ query: |
       for parent in ncbi_taxon
         filter parent.id == @id
         filter parent.created <= @ts AND parent.expired >= @ts
+        limit 1
         for tax in 1..1 inbound parent ncbi_child_of_taxon
             return tax
   )
   // Sort and filter the children
+  // Should only get evaluated if search_text is truthy
   let searched = (
       for tax in FULLTEXT(ncbi_taxon, "scientific_name", @search_text)
         filter tax in children
