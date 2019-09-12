@@ -3,7 +3,7 @@
 name: GO_get_ancestors
 params:
   type: object
-  required: [id]
+  required: [id, ts]
   properties:
     id:
       type: string
