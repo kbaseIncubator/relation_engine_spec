@@ -8,10 +8,13 @@ params:
       type: string
       title: Document ID
       description: ID of the taxon vertex for which you want to find descendants
+    ts:
+      type: integer
+      title: Versioning timestamp
 query: |
   for tax in ncbi_taxon
     filter tax.id == @id
-    filter tax.expired == 9007199254740991
+    filter tax.created <= @ts AND tax.expired >= @ts
     limit 1
     for child in 1..1 inbound tax ncbi_child_of_taxon
       return tax

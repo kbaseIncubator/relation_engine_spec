@@ -22,11 +22,15 @@ params:
       type: string
       description: Search scientific name
       default: ''
+    ts:
+      type: integer
+      title: Versioning timestamp
 query: |
   // Fetch the child IDs using the edge attributes
   let children = (
       for parent in ncbi_taxon
         filter parent.id == @id
+        filter parent.created <= @ts AND parent.expired >= @ts
         for tax in 1..1 inbound parent ncbi_child_of_taxon
             return tax
   )

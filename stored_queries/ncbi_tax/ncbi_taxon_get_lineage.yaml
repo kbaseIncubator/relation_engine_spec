@@ -9,15 +9,18 @@ params:
       type: string
       title: Document id
       description: ID of the taxon vertex for which you want to find ancestors
+    ts:
+      type: integer
+      title: Versioning timestamp
 query: |
   let ps = (
     for t in ncbi_taxon
       filter t.id == @id
-      filter t.expired == 9007199254740991
+      filter t.created <= @ts AND t.expired >= @ts
       limit 1
       for p, e in 1..10 outbound t ncbi_child_of_taxon
         options {bfs: true}
-        filter p.expired == 9007199254740991
+        filter p.created <= @ts AND p.expired >= @ts
         return distinct p
   )
   // doing return reverse(ps) returns an array of an array for some reason,

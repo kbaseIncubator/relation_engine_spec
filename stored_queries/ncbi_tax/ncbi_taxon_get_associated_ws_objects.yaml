@@ -4,7 +4,7 @@ name: ncbi_taxon_get_associated_ws_objects
 
 params:
   type: object
-  required: [taxon_id]
+  required: [taxon_id, ts]
   properties:
     taxon_id:
       type: string
@@ -20,12 +20,15 @@ params:
       default: 0
       description: Result offset for pagination
       maximum: 100000
+    ts:
+      type: integer
+      title: Versioning timestamp
 query_prefix: WITH ws_object_version
 query: |
   let count = COUNT(
     for tax in ncbi_taxon
       filter tax.id == @taxon_id
-      filter tax.expired == 9007199254740991
+      filter tax.created <= @ts AND tax.expired >= @ts
       limit 1
       for obj in 1..1 inbound tax ws_obj_version_has_taxon
         return 1
@@ -33,7 +36,7 @@ query: |
   let results = (
     for tax in ncbi_taxon
       filter tax.id == @taxon_id
-      filter tax.expired == 9007199254740991
+      filter tax.created <= @ts AND tax.expired >= @ts
       limit 1
       for obj, e in 1..1 inbound tax ws_obj_version_has_taxon
         filter obj.is_public or obj.workspace_id IN ws_ids

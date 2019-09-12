@@ -19,17 +19,21 @@ params:
       default: 0
       description: Result offset for pagination
       maximum: 100000
+    ts:
+      type: integer
+      title: Versioning timestamp
 query: |
   // Fetch the siblings
   let siblings = (
     for t in ncbi_taxon
       filter t.id == @id
-      filter t.expired == 9007199254740991
+      filter t.created <= @ts AND t.expired >= @ts
       limit 1
       for parent in 1..1 outbound t ncbi_child_of_taxon
-        filter parent.expired == 9007199254740991
+        filter parent.created <= @ts AND parent.expired >= @ts
         for child in 1..1 inbound parent ncbi_child_of_taxon
-          filter child.id != @id AND child.expired == 9007199254740991
+          filter child != t
+          filter child.created <= @ts AND child.expired >= @ts
           sort child.scientific_name asc
           return child
   )
