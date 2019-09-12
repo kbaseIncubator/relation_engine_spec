@@ -19,14 +19,18 @@ params:
         default: 0
         description: Result offset for pagination
         maximum: 100000
+    ts:
+      type: integer
+      title: Versioning timestamp
 query_prefix: WITH GO_test_term
 query: |
   FOR t in GO_terms
     filter t.id == @id
-    filter t.expired == 9007199254740991
+    filter t.created <= @ts AND t.expired >= @ts
     limit 1
     for v, e IN 1..100 OUTBOUND t GO_edges
-       filter e.type == "is_a" AND v.expired == 9007199254740991
-       sort v.id asc
-       limit @offset, @limit
-       return {term: v, edge: e}
+      filter e.type == "is_a"
+      filter e.created <= @ts AND t.expired >= @ts
+      sort v.id asc
+      limit @offset, @limit
+      return {term: v, edge: e}
