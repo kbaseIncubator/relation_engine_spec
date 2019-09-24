@@ -84,12 +84,22 @@ class TestNcbiTax(unittest.TestCase):
             {'_from': 'ws_workspace/1', '_to': 'ws_object_version/1:1:2'},
             {'_from': 'ws_workspace/2', '_to': 'ws_object_version/2:1:1'},
         ]
+        ws_type_version_docs = [
+            {'_key': 'KBaseGenomes.Genome-99.99', 'module_name': 'KBaseGenomes',
+             'type_name': 'Genome', 'maj_ver': 99, 'min_ver': 99}
+        ]
+        ws_obj_instance_of_type_docs = [
+            {'_from': 'ws_object_version/1:1:1', '_to': 'ws_type_version/KBaseGenomes.Genome-99.99'},
+            {'_from': 'ws_object_version/1:1:2', '_to': 'ws_type_version/KBaseGenomes.Genome-99.99'}
+        ]
         _create_delta_test_docs('ncbi_taxon', taxon_docs)
         _create_delta_test_docs('ncbi_child_of_taxon', child_docs, edge=True)
         _create_delta_test_docs('ws_object_version', obj_docs)
         _create_delta_test_docs('ws_obj_version_has_taxon', obj_to_taxa_docs, edge=True)
         _create_delta_test_docs('ws_workspace', ws_docs)
         _create_delta_test_docs('ws_workspace_contains_obj', ws_to_obj, edge=True)
+        create_test_docs('ws_obj_instance_of_type', ws_obj_instance_of_type_docs)
+        create_test_docs('ws_type_version', ws_type_version_docs)
 
     def test_get_lineage_valid(self):
         """Test a valid query of taxon lineage."""
