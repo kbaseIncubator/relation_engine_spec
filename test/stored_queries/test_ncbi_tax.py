@@ -85,12 +85,12 @@ class TestNcbiTax(unittest.TestCase):
             {'_from': 'ws_workspace/2', '_to': 'ws_object_version/2:1:1'},
         ]
         ws_type_version_docs = [
-            {'_key': 'KBaseGenomes.Genome-99.99', 'module_name': 'KBaseGenomes',
-             'type_name': 'Genome', 'maj_ver': 99, 'min_ver': 99}
+            {'_key': 'KBaseGenomes.Genome-99.77', 'module_name': 'KBaseGenomes',
+             'type_name': 'Genome', 'maj_ver': 99, 'min_ver': 77}
         ]
         ws_obj_instance_of_type_docs = [
-            {'_from': 'ws_object_version/1:1:1', '_to': 'ws_type_version/KBaseGenomes.Genome-99.99'},
-            {'_from': 'ws_object_version/1:1:2', '_to': 'ws_type_version/KBaseGenomes.Genome-99.99'}
+            {'_from': 'ws_object_version/1:1:1', '_to': 'ws_type_version/KBaseGenomes.Genome-99.77'},
+            {'_from': 'ws_object_version/1:1:2', '_to': 'ws_type_version/KBaseGenomes.Genome-99.77'}
         ]
         _create_delta_test_docs('ncbi_taxon', taxon_docs)
         _create_delta_test_docs('ncbi_child_of_taxon', child_docs, edge=True)
@@ -296,4 +296,10 @@ class TestNcbiTax(unittest.TestCase):
         ids = {ret['ws_obj']['_id'] for ret in results['results']}
         self.assertEqual(assignments, {'assn1', 'assn2'})
         self.assertEqual(ids, {'ws_object_version/1:1:1', 'ws_object_version/1:1:2'})
-        self.assertEqual(results['results'][0]['ws_obj']['type']['type_name'], 'Genome')
+        self.assertEqual(results['results'][0]['ws_obj']['type'], {
+            'type_name': 'Genome',
+            'module_name': 'KBaseGenomes',
+            'maj_ver': 99,
+            'min_ver': 77,
+            '_key': 'KBaseGenomes.Genome-99.77'
+        })
