@@ -285,7 +285,8 @@ class TestNcbiTax(unittest.TestCase):
         resp = requests.post(
             _CONF['re_api_url'] + '/api/v1/query_results',
             params={'stored_query': 'ncbi_taxon_get_associated_ws_objects'},
-            data=json.dumps({'ts': _NOW, 'taxon_id': '1', 'select_obj': ['_id'], 'select_edge': ['assigned_by']}),
+            data=json.dumps({'ts': _NOW, 'taxon_id': '1', 'select_obj': ['_id', 'type'],
+                             'select_edge': ['assigned_by']}),
         ).json()
         self.assertEqual(resp['count'], 1)
         results = resp['results'][0]
@@ -295,3 +296,4 @@ class TestNcbiTax(unittest.TestCase):
         ids = {ret['ws_obj']['_id'] for ret in results['results']}
         self.assertEqual(assignments, {'assn1', 'assn2'})
         self.assertEqual(ids, {'ws_object_version/1:1:1', 'ws_object_version/1:1:2'})
+        self.assertEqual(results['results'][0]['ws_obj']['type']['type_name'], 'Genome')
