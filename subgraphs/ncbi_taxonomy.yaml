@@ -1,0 +1,8 @@
+id: ncbi_taxonomy
+name: NCBI Taxonomy
+category: taxonomy
+url: https://www.ncbi.nlm.nih.gov/taxonomy
+vertices: [ncbi_taxon]
+edges:
+  ncbi_child_of_taxon: [[ncbi_taxon, ncbi_taxon]]
+  ncbi_taxon_merges: [[ncbi_taxon, ncbi_taxon]]
