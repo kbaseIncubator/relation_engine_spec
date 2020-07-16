@@ -43,15 +43,15 @@ class DJORNL_Parser(object):
 
         _CLUSTER_BASE = os.path.join(configuration['ROOT_DATA_PATH'], 'cluster_data')
         configuration['_CLUSTER_PATHS'] = {
-            'cluster_I2': os.path.join(
+            'markov_i2': os.path.join(
                 _CLUSTER_BASE,
                 'out.aranetv2_subnet_AT-CX_top10percent_anno_AF_082919.abc.I2_named.tsv'
             ),
-            'cluster_I4': os.path.join(
+            'markov_i4': os.path.join(
                 _CLUSTER_BASE,
                 'out.aranetv2_subnet_AT-CX_top10percent_anno_AF_082919.abc.I4_named.tsv'
             ),
-            'cluster_I6': os.path.join(
+            'markov_i6': os.path.join(
                 _CLUSTER_BASE,
                 'out.aranetv2_subnet_AT-CX_top10percent_anno_AF_082919.abc.I6_named.tsv'
             ),
@@ -163,22 +163,47 @@ class DJORNL_Parser(object):
 
     def load_cluster_data(self):
         """Annotate genes with cluster ID fields."""
-        nodes = []
+
+        # index of nodes
+        node_ix = {}
         cluster_paths = self.config()['_CLUSTER_PATHS']
         for (cluster_label, path) in cluster_paths.items():
             with open(path) as fd:
                 csv_reader = csv.reader(fd, delimiter='\t')
                 for row in csv_reader:
                     if len(row) > 1:
-                        # remove the 'Cluster' text
-                        cluster_id = row[0].replace('Cluster','')
-                        gene_keys = row[1:]
-                        nodes += [
-                            {'_key': key, cluster_label: int(cluster_id)}
-                            for key in gene_keys
-                        ]
+                        self._parse_cluster_row(row, cluster_label, node_ix)
+
+
+        # gather a list of cluster IDs for each node
+        nodes = []
+        for (key, cluster_data) in node_ix.items():
+            clusters = []
+            for (cluster_label, id_list) in cluster_data.items():
+                clusters += [cluster_label + ":" + id for id in id_list]
+
+            nodes += [{
+                '_key': key,
+                'clusters': clusters
+            }]
 
         return {'nodes': nodes}
+
+
+    def _parse_cluster_row(self, row, cluster_label, node_ix):
+        # metadata rows start with '#'
+        if row[0] != '#':
+            # remove the 'Cluster' text
+            cluster_id = row[0].replace('Cluster','')
+            node_keys = row[1:]
+
+            for key in node_keys:
+                if key not in node_ix:
+                    node_ix[key] = {}
+                if cluster_label not in node_ix[key]:
+                    node_ix[key][cluster_label] = []
+
+                node_ix[key][cluster_label].append(cluster_id)
 
 
     def save_dataset(self, dataset):

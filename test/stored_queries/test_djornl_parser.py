@@ -142,4 +142,3 @@ class Test_DJORNL_Parser(unittest.TestCase):
             cluster_data,
             self.json_data["load_cluster_data"]
         )
-
