@@ -10,8 +10,6 @@ import unittest
 import requests
 import os
 import contextlib
-from jsonschema.exceptions import ValidationError
-
 from importers.djornl.parser import DJORNL_Parser
 
 from test.helpers import get_config, assert_subset, modified_environ
@@ -159,9 +157,5 @@ class Test_DJORNL_Parser(unittest.TestCase):
             self.json_data["load_cluster_data"]
         )
 
-    def test_load_valid_node_metadata(self):
-
-        RES_ROOT_DATA_PATH = os.path.join(_TEST_DIR, 'djornl', 'test_data')
-        parser = self.init_parser_with_path(RES_ROOT_DATA_PATH)
-
         parser.check_data_delta()
+

@@ -9,11 +9,7 @@ import requests
 import os
 import csv
 import yaml
-import json
-import jsonschema
-
 from jsonschema.validators import Draft7Validator
-from jsonschema.exceptions import ValidationError
 
 import importers.utils.config as config
 
@@ -54,7 +50,6 @@ class DJORNL_Parser(object):
 
         validator = Draft7Validator(manifest_schema)
         if not validator.is_valid(manifest):
-            error_list = []
             raise RuntimeError(
                 "The manifest file failed validation with the following errors:\n"
                 + "\n".join(e.message for e in sorted(validator.iter_errors(manifest), key=str))
