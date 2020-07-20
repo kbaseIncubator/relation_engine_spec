@@ -94,23 +94,23 @@ class Test_DJORNL_Stored_Queries(unittest.TestCase):
 
     def test_fetch_all(self):
 
-        # expect all the nodes from load_node_metadata and all the edges from load_edges
-        expected = {
-            "nodes": [n["_key"] for n in self.json_data['load_node_metadata']['nodes']],
-            "edges": [ {
-              "_to":        e["_to"],
-              "_from":      e["_from"],
-              "score":      e["score"],
-              "edge_type":  e["edge_type"] } for e in self.json_data['load_edges']['edges']
-            ]
-        }
-
+        response = self.submit_query('djornl_fetch_all')
         self.check_expected_results(
             "djornl_fetch_all",
-            self.submit_query('djornl_fetch_all'),
+            response,
             self.json_data['fetch_all']
         )
 
+        # ensure that all the cluster data is returned OK
+        node_data = response['results'][0]['nodes']
+        nodes_with_clusters = [json.dumps({
+            '_key':     n['_key'],
+            'clusters': n['clusters']
+        }) for n in node_data if 'clusters' in n]
+        self.assertEqual(
+            set(nodes_with_clusters),
+            set([json.dumps(this) for this in self.json_data['load_cluster_data']['nodes']])
+        )
 
     # indexing schema in results.json
     # self.json_data[query_name][param_name][param_value]["distance"][distance_param]

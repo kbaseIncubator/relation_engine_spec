@@ -1,0 +1,10 @@
+- data_type: edge
+  path: edges.tsv
+
+- data_type: node
+
+- data_type: cluster
+  path: clusters.tsv
+
+- data_type: ping-pong balls
+  path: where?

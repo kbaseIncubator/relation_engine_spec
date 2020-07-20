@@ -8,6 +8,12 @@ import json
 import requests
 import os
 import csv
+import yaml
+import json
+import jsonschema
+
+from jsonschema.validators import Draft7Validator
+from jsonschema.exceptions import ValidationError
 
 import importers.utils.config as config
 
@@ -28,34 +34,50 @@ class DJORNL_Parser(object):
         configuration['_NODE_NAME'] = 'djornl_node'
         configuration['_EDGE_NAME'] = 'djornl_edge'
 
-        # Path config
-        configuration['_NODE_PATH'] = os.path.join(
-            configuration['ROOT_DATA_PATH'],
-            'aranet2-aragwas-MERGED-AMW-v2_091319_nodeTable.csv'
-        )
-        configuration['_NODE_FILE_COL_COUNT'] = 20
+        # read the manifest file, which contains path and file type info
+        manifest_file = os.path.join(configuration['ROOT_DATA_PATH'], 'manifest.yaml')
 
-        configuration['_EDGE_PATH'] = os.path.join(
-            configuration['ROOT_DATA_PATH'],
-            'merged_edges-AMW-060820_AF.tsv'
-        )
-        configuration['_EDGE_FILE_COL_COUNT'] = 5
+        try:
+            with open(manifest_file) as fd:
+                manifest = yaml.safe_load(fd)
+        except FileNotFoundError:
+            raise RuntimeError(
+                f"No manifest file found at {manifest_file}.\n"
+                + "Please ensure that you have created a manifest that lists the files "
+                + "in the release"
+            )
 
-        _CLUSTER_BASE = os.path.join(configuration['ROOT_DATA_PATH'], 'cluster_data')
-        configuration['_CLUSTER_PATHS'] = {
-            'markov_i2': os.path.join(
-                _CLUSTER_BASE,
-                'out.aranetv2_subnet_AT-CX_top10percent_anno_AF_082919.abc.I2_named.tsv'
-            ),
-            'markov_i4': os.path.join(
-                _CLUSTER_BASE,
-                'out.aranetv2_subnet_AT-CX_top10percent_anno_AF_082919.abc.I4_named.tsv'
-            ),
-            'markov_i6': os.path.join(
-                _CLUSTER_BASE,
-                'out.aranetv2_subnet_AT-CX_top10percent_anno_AF_082919.abc.I6_named.tsv'
-            ),
-        }
+        # load the schema for the manifest and ensure that it is valid
+        schema_file = os.path.join(os.path.dirname(__file__), 'manifest.schema.json')
+        with open(schema_file) as fd:
+            manifest_schema = json.load(fd)
+
+        validator = Draft7Validator(manifest_schema)
+        if not validator.is_valid(manifest):
+            error_list = []
+            raise RuntimeError(
+                "The manifest file failed validation with the following errors:\n"
+                + "\n".join(e.message for e in sorted(validator.iter_errors(manifest), key=str))
+                + "\nPlease recheck the file and try again."
+            )
+
+        # make sure all the files listed actually exist
+        for type in ['node', 'edge', 'cluster']:
+            configuration[type + '_files'] = []
+
+        for file in manifest:
+            file_path = os.path.join(configuration['ROOT_DATA_PATH'], file['path'])
+
+            if not os.path.exists(file_path):
+                raise RuntimeError(f"{file_path}: file does not exist")
+
+            if not os.path.isfile(file_path):
+                raise RuntimeError(f"{file_path}: not a file")
+
+            # add the file to the appropriate list
+            file['file_path'] = file_path
+            configuration[file['data_type'] + '_files'].append(file)
+
         self._config = configuration
         return self._config
 
@@ -76,33 +98,44 @@ class DJORNL_Parser(object):
         node_ix = {}
         edges = []
         node_name = self.config()['_NODE_NAME']
-        expected_col_count = self.config()['_EDGE_FILE_COL_COUNT']
+        expected_col_count = 0
+        headers = []
 
-        with open(self.config()['_EDGE_PATH']) as fd:
-            csv_reader = csv.reader(fd, delimiter='\t')
-            next(csv_reader, None)  # skip headers
-            line_no = 1
-            for row in csv_reader:
-                line_no += 1
+        for file in self.config()['edge_files']:
+            with open(file['file_path']) as fd:
+                csv_reader = csv.reader(fd, delimiter='\t')
+                line_no = 0
+                for row in csv_reader:
+                    line_no += 1
+                    if len(row) <= 1 or row[0][0] == '#':
+                        # comment / metadata
+                        continue
 
-                cols = [c.strip() for c in row]
-                if len(cols) != expected_col_count:
-                    n_cols = len(cols)
-                    raise RuntimeError(f"line {line_no}: expected {expected_col_count} cols, found {n_cols}")
+                    cols = [c.strip() for c in row]
 
-                node_ix[cols[0]] = 1
-                node_ix[cols[1]] = 1
-                edge_type = cols[4]
-                if edge_type not in edge_remap:
-                    raise RuntimeError(f"line {line_no}: invalid edge type: {edge_type}")
+                    if len(cols) != expected_col_count:
+                        n_cols = len(cols)
 
-                edges.append({
-                    '_key': f'{cols[0]}__{cols[1]}__{edge_remap[edge_type]}__{cols[2]}',
-                    '_from': f'{node_name}/{cols[0]}',
-                    '_to': f'{node_name}/{cols[1]}',
-                    'score': float(cols[2]),
-                    'edge_type': edge_remap[edge_type],
-                })
+                        if len(headers) == 0:
+                            expected_col_count = len(cols)
+                            headers = cols
+                            continue
+
+                        raise RuntimeError(f"{file['path']} line {line_no}: expected {expected_col_count} cols, found {n_cols}")
+
+                    node_ix[cols[0]] = 1
+                    node_ix[cols[1]] = 1
+                    edge_type = cols[4]
+                    if edge_type not in edge_remap:
+                        raise RuntimeError(f"{file['path']} line {line_no}: invalid edge type: {edge_type}")
+
+                    edges.append({
+                        '_key': f'{cols[0]}__{cols[1]}__{edge_remap[edge_type]}__{cols[2]}',
+                        '_from': f'{node_name}/{cols[0]}',
+                        '_to': f'{node_name}/{cols[1]}',
+                        'score': float(cols[2]),
+                        'edge_type': edge_remap[edge_type],
+                    })
 
         return {
             'nodes': [{'_key': n} for n in node_ix.keys()],
@@ -114,49 +147,62 @@ class DJORNL_Parser(object):
         """Load node metadata"""
 
         nodes = []
-        expected_col_count = self.config()['_NODE_FILE_COL_COUNT']
-        with open(self.config()['_NODE_PATH']) as fd:
-            csv_reader = csv.reader(fd, delimiter=',')
-            next(csv_reader, None)  # skip headers
-            line_no = 1
-            for row in csv_reader:
-                line_no += 1
+        headers = []
+        expected_col_count = 0
+        valid_node_types = ['gene', 'pheno']
+        for file in self.config()['node_files']:
+            with open(file['file_path']) as fd:
+                csv_reader = csv.reader(fd, delimiter=',')
+                line_no = 0
+                for row in csv_reader:
+                    line_no += 1
+                    if len(row) <= 1 or row[0][0] == '#':
+                        # comment / metadata
+                        continue
 
-                cols = [c.strip() for c in row]
-                if len(cols) != expected_col_count:
-                    n_cols = len(cols)
-                    raise RuntimeError(f"line {line_no}: expected {expected_col_count} cols, found {n_cols}")
+                    cols = [c.strip() for c in row]
+                    if len(cols) != expected_col_count:
 
-                _key = cols[0]
-                node_type = cols[1]
-                if node_type != 'gene' and node_type != 'pheno':
-                    raise RuntimeError(f"line {line_no}: invalid node type: {node_type}")
+                        if len(headers) == 0:
+                            # this is the header row; set up the expected column count
+                            expected_col_count = len(cols)
+                            headers = cols
+                            continue
 
-                go_terms = [c.strip() for c in cols[10].split(',')] if len(cols[10]) else []
+                        # otherwise, this row does not have the correct number of columns
+                        n_cols = len(cols)
+                        raise RuntimeError(f"{file['path']} line {line_no}: expected {expected_col_count} cols, found {n_cols}")
 
-                doc = {
-                    '_key': _key,
-                    'node_type': node_type,
-                    'transcript': cols[2],
-                    'gene_symbol': cols[3],
-                    'gene_full_name': cols[4],
-                    'gene_model_type': cols[5],
-                    'tair_computational_desc': cols[6],
-                    'tair_curator_summary': cols[7],
-                    'tair_short_desc': cols[8],
-                    'go_descr': cols[9],
-                    'go_terms': go_terms,
-                    'mapman_bin': cols[11],
-                    'mapman_name': cols[12],
-                    'mapman_desc': cols[13],
-                    'pheno_aragwas_id': cols[14],
-                    'pheno_desc1': cols[15],
-                    'pheno_desc2': cols[16],
-                    'pheno_desc3': cols[17],
-                    'pheno_ref': cols[18],
-                    'user_notes': cols[19],
-                }
-                nodes.append(doc)
+                    _key = cols[0]
+                    node_type = cols[1]
+                    if node_type not in valid_node_types:
+                        raise RuntimeError(f"{file['path']} line {line_no}: invalid node type: {node_type}")
+
+                    go_terms = [c.strip() for c in cols[10].split(',')] if len(cols[10]) else []
+
+                    doc = {
+                        '_key': _key,
+                        'node_type': node_type,
+                        'transcript': cols[2],
+                        'gene_symbol': cols[3],
+                        'gene_full_name': cols[4],
+                        'gene_model_type': cols[5],
+                        'tair_computational_desc': cols[6],
+                        'tair_curator_summary': cols[7],
+                        'tair_short_desc': cols[8],
+                        'go_descr': cols[9],
+                        'go_terms': go_terms,
+                        'mapman_bin': cols[11],
+                        'mapman_name': cols[12],
+                        'mapman_desc': cols[13],
+                        'pheno_aragwas_id': cols[14],
+                        'pheno_desc1': cols[15],
+                        'pheno_desc2': cols[16],
+                        'pheno_desc3': cols[17],
+                        'pheno_ref': cols[18],
+                        'user_notes': cols[19],
+                    }
+                    nodes.append(doc)
 
         return {'nodes': nodes}
 
@@ -166,44 +212,41 @@ class DJORNL_Parser(object):
 
         # index of nodes
         node_ix = {}
-        cluster_paths = self.config()['_CLUSTER_PATHS']
-        for (cluster_label, path) in cluster_paths.items():
-            with open(path) as fd:
+        for file in self.config()['cluster_files']:
+            cluster_label = file['prefix']
+            with open(file['file_path']) as fd:
                 csv_reader = csv.reader(fd, delimiter='\t')
+                line_no = 0
                 for row in csv_reader:
-                    if len(row) > 1:
-                        self._parse_cluster_row(row, cluster_label, node_ix)
+                    line_no += 1
+                    if len(row) <= 1 or row[0][0] == '#':
+                        # comment / metadata
+                        continue
 
+                    self._parse_cluster_row(row, cluster_label, node_ix)
 
         # gather a list of cluster IDs for each node
-        nodes = []
-        for (key, cluster_data) in node_ix.items():
-            clusters = []
-            for (cluster_label, id_list) in cluster_data.items():
-                clusters += [cluster_label + ":" + id for id in id_list]
-
-            nodes += [{
-                '_key': key,
-                'clusters': clusters
-            }]
+        nodes = [{
+            '_key': key,
+            'clusters': cluster_data
+        } for (key, cluster_data) in node_ix.items()]
 
         return {'nodes': nodes}
 
 
     def _parse_cluster_row(self, row, cluster_label, node_ix):
-        # metadata rows start with '#'
-        if row[0] != '#':
-            # remove the 'Cluster' text
-            cluster_id = row[0].replace('Cluster','')
-            node_keys = row[1:]
 
-            for key in node_keys:
-                if key not in node_ix:
-                    node_ix[key] = {}
-                if cluster_label not in node_ix[key]:
-                    node_ix[key][cluster_label] = []
+        # remove the 'Cluster' text
+        id = row[0].replace('Cluster','')
+        node_keys = row[1:]
 
-                node_ix[key][cluster_label].append(cluster_id)
+        for key in node_keys:
+            if key not in node_ix:
+                node_ix[key] = []
+
+            cluster_id = cluster_label + ':' + id
+            if cluster_id not in node_ix[key]:
+                node_ix[key].append(cluster_id)
 
 
     def save_dataset(self, dataset):
@@ -237,3 +280,32 @@ class DJORNL_Parser(object):
         self.save_dataset(self.load_node_metadata())
         self.save_dataset(self.load_cluster_data())
 
+
+    def check_data_delta(self):
+        edge_data = self.load_edges()
+        node_metadata = self.load_node_metadata()
+        clusters = self.load_cluster_data()
+
+        self.check_deltas(edge_data=edge_data, node_metadata=node_metadata, cluster_data=clusters)
+
+    def check_deltas(self, edge_data={}, node_metadata={}, cluster_data={}):
+
+        edge_nodes = set([e['_key'] for e in edge_data['nodes']])
+        node_metadata_nodes = set([e['_key'] for e in node_metadata['nodes']])
+        cluster_nodes = set([e['_key'] for e in cluster_data['nodes']])
+        all_nodes = edge_nodes.union(node_metadata_nodes).union(cluster_nodes)
+
+        # check all nodes in cluster_data have node_metadata
+        clstr_no_node_md_set = cluster_nodes.difference(node_metadata_nodes)
+        if clstr_no_node_md_set:
+           print({'clusters with no node metadata': clstr_no_node_md_set})
+
+        # check all nodes in the edge_data have node_metadata
+        edge_no_node_md_set = edge_nodes.difference(node_metadata_nodes)
+        if edge_no_node_md_set:
+            print({'edges with no node metadata': edge_no_node_md_set})
+
+        # count all edges
+        print("Dataset contains " + str(len(edge_data['edges'])) + " edges")
+        # count all nodes
+        print("Dataset contains " + str(len(all_nodes)) + " nodes")
