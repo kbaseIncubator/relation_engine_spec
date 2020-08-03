@@ -1,3 +1,9 @@
+# MOVED!
+
+## This code is now maintained at https://github.com/kbase/relation_engine.
+
+---
+
 # Relation Engine Spec
 
 This repo holds the [stored queries](stored_queries), [schemas](schemas), and [migrations](migrations) for the relation engine graph database service.
