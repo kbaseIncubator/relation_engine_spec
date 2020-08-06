@@ -1,3 +1,6 @@
+# data_type: cluster
+# prefix: markov_i6
+# title: Markov clustering, inflation = 6
 Cluster1	AT1G01040	AT1G01090
 Cluster2	AT1G01070
 Cluster3	AT1G01010	AT1G01020	AT1G01030

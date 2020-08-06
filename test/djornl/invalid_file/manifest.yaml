@@ -1,0 +1,9 @@
+- data_type: edge
+  path: edges.tsv
+
+- data_type: node
+  path: nodes.csv
+
+- data_type: cluster
+  prefix: markov_i2
+  path: clusters.tsv

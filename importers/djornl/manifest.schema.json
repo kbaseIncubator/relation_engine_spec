@@ -1,0 +1,52 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Exascale parser file manifest",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["data_type", "path"],
+    "oneOf": [
+      {
+        "properties": {
+          "data_type": { "enum": ["cluster"] }
+        },
+        "required": [ "prefix" ]
+      },
+      {
+        "properties": {
+          "data_type": { "enum": [ "node", "edge" ] }
+        }
+      }
+    ],
+    "properties": {
+      "data_type": {
+        "title": "Data type",
+        "type": "string",
+        "enum": ["node", "edge", "cluster"]
+      },
+      "creation_date": {
+        "title": "File creation date",
+        "description": "date of file creation in the format YYYY-MM-DD",
+        "type": "string",
+        "format": "date"
+      },
+      "description": {
+        "title": "Description of the cluster set",
+        "type": "string"
+      },
+      "path": {
+        "title": "File path",
+        "type": "string"
+      },
+      "prefix": {
+        "title": "Prefix",
+        "type": "string",
+        "description": "The prefix to be used for clusters, e.g. markov_i2:4. Required for cluster data, not used for node or edge data"
+      },
+      "title": {
+        "title": "Name of the cluster set",
+        "type": "string"
+      }
+    }
+  }
+}

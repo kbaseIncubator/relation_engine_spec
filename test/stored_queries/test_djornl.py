@@ -6,10 +6,8 @@ import time
 import unittest
 import requests
 import os
-import glob
-import yaml
 
-from test.helpers import get_config, assert_subset, modified_environ
+from test.helpers import get_config, modified_environ
 from test.stored_queries.helpers import create_test_docs
 from importers.djornl.parser import DJORNL_Parser
 
@@ -79,6 +77,7 @@ class Test_DJORNL_Stored_Queries(unittest.TestCase):
 
         if _VERBOSE:
             print("Running test " + description)
+
         results = response['results'][0]
         self.assertEqual(
             set([n["_key"] for n in results['nodes']]),
@@ -93,44 +92,48 @@ class Test_DJORNL_Stored_Queries(unittest.TestCase):
 
     def test_fetch_all(self):
 
-        # expect all the nodes from load_node_metadata and all the edges from load_edges
-        expected = {
-            "nodes": [n["_key"] for n in self.json_data['load_node_metadata']['nodes']],
-            "edges": [ {
-              "_to":        e["_to"],
-              "_from":      e["_from"],
-              "score":      e["score"],
-              "edge_type":  e["edge_type"] } for e in self.json_data['load_edges']['edges']
-            ]
-        }
-
+        response = self.submit_query('djornl_fetch_all')
         self.check_expected_results(
             "djornl_fetch_all",
-            self.submit_query('djornl_fetch_all'),
+            response,
             self.json_data['fetch_all']
         )
 
+        # ensure that all the cluster data is returned OK
+        node_data = response['results'][0]['nodes']
+        nodes_with_clusters = [json.dumps({
+            '_key':     n['_key'],
+            'clusters': n['clusters']
+        }) for n in node_data if 'clusters' in n]
+        self.assertEqual(
+            set(nodes_with_clusters),
+            set([json.dumps(this) for this in self.json_data['load_cluster_data']['nodes']])
+        )
 
     # indexing schema in results.json
-    # self.json_data[query][primary_param][distance_param]
-    # if primary_param is an array, join the array entities with "__"
+    # self.json_data[query_name][param_name][param_value]["distance"][distance_param]
+    # e.g. for fetch_clusters data:
+    # "fetch_clusters": {
+    #   "cluster_ids": {
+    #     "markov_i2:6__markov_i4:3": {
+    #       "distance": {
+    #         1: {
+    #           "nodes": [ node IDs ],
+    #           "edges": [ edge data ],
+    #         }
+    #       }
+    #     }
+    #   }
+    # }
+    # if param_value is an array, join the array entities with "__"
     # results are in the form {"nodes": [...], "edges": [...]}
     # nodes are represented as a list of node[_key]
     # edges are objects with keys _to, _from, edge_type and score
 
-    def test_fetch_phenotypes_no_results(self):
-
-        resp = self.submit_query('djornl_fetch_phenotypes', {
-            # gene node
-            "keys": ["AT1G01010"],
-        })
-        self.assertEqual(resp['results'][0], self.no_results)
-
-
     def test_fetch_phenotypes(self):
 
-        for fetch_args in self.json_data['fetch_phenotypes'].keys():
-            for distance in self.json_data['fetch_phenotypes'][fetch_args].keys():
+        for (fetch_args, key_data) in self.json_data['fetch_phenotypes']['keys'].items():
+            for (distance, distance_data) in key_data['distance'].items():
                 resp = self.submit_query('djornl_fetch_phenotypes', {
                     "keys": fetch_args.split('__'),
                     "distance": int(distance),
@@ -138,22 +141,14 @@ class Test_DJORNL_Stored_Queries(unittest.TestCase):
                 self.check_expected_results(
                     "fetch phenotypes with args " + fetch_args + " and distance " + distance,
                     resp,
-                    self.json_data['fetch_phenotypes'][fetch_args][distance]
+                    distance_data
                 )
-
-
-    def test_fetch_genes_no_results(self):
-        resp = self.submit_query('djornl_fetch_genes', {
-            # phenotype node
-            "keys": ["As2"],
-        })
-        self.assertEqual(resp['results'][0], self.no_results)
 
 
     def test_fetch_genes(self):
 
-        for fetch_args in self.json_data['fetch_genes'].keys():
-            for distance in self.json_data['fetch_genes'][fetch_args].keys():
+        for (fetch_args, key_data) in self.json_data['fetch_genes']['keys'].items():
+            for (distance, distance_data) in key_data['distance'].items():
                 resp = self.submit_query('djornl_fetch_genes', {
                     "keys": fetch_args.split('__'),
                     "distance": int(distance),
@@ -161,54 +156,29 @@ class Test_DJORNL_Stored_Queries(unittest.TestCase):
                 self.check_expected_results(
                     "fetch genes with args " + fetch_args + " and distance " + distance,
                     resp,
-                    self.json_data['fetch_genes'][fetch_args][distance]
+                    distance_data
                 )
-
-
-    def test_fetch_clusters_no_results(self):
-
-        resp = self.submit_query('djornl_fetch_clusters', {
-            'cluster_i2_ids': [666],
-            'cluster_i4_ids': [666],
-            'cluster_i6_ids': [666],
-        })
-        self.assertEqual(resp['results'][0], self.no_results)
 
 
     def test_fetch_clusters(self):
 
-        for fetch_args in self.json_data['fetch_clusters'].keys():
-            cluster_args = {}
-            for arg in fetch_args.split('__'):
-                [c_name, c_id] = arg.split('-', maxsplit=1)
-                if "cluster_" + c_name + "_ids" in cluster_args:
-                    cluster_args["cluster_" + c_name + "_ids"] += int(c_id)
-                else:
-                    cluster_args["cluster_" + c_name + "_ids"] = [int(c_id)]
-
-            for distance in self.json_data['fetch_clusters'][fetch_args].keys():
-                cluster_args['distance'] = int(distance)
-                resp = self.submit_query('djornl_fetch_clusters', cluster_args)
+        for (fetch_args, cluster_data) in self.json_data['fetch_clusters']['cluster_ids'].items():
+            for (distance, distance_data) in cluster_data['distance'].items():
+                resp = self.submit_query('djornl_fetch_clusters', {
+                    "cluster_ids": fetch_args.split('__'),
+                    "distance": int(distance),
+                })
                 self.check_expected_results(
                     "fetch clusters with args " + fetch_args + " and distance " + distance,
                     resp,
-                    self.json_data['fetch_clusters'][fetch_args][distance]
+                    distance_data
                 )
 
-    @unittest.skip('This test is disabled until automated view loading is possible')
-    def test_search_nodes_no_results(self):
 
-        resp = self.submit_query('djornl_search_nodes', {
-            "search_text": "Mary Poppins",
-        })
-        self.assertEqual(resp['results'][0], self.no_results)
-
-
-    @unittest.skip('This test is disabled until automated view loading is possible')
     def test_search_nodes(self):
 
-        for search_text in self.json_data['search_nodes'].keys():
-            for distance in self.json_data['search_nodes'][search_text].keys():
+        for (search_text, search_data) in self.json_data['search_nodes']['search_text'].items():
+            for (distance, distance_data) in search_data['distance'].items():
                 resp = self.submit_query('djornl_search_nodes', {
                     "search_text": search_text,
                     "distance": int(distance),
@@ -216,5 +186,5 @@ class Test_DJORNL_Stored_Queries(unittest.TestCase):
                 self.check_expected_results(
                     "search nodes with args " + search_text + " and distance " + distance,
                     resp,
-                    self.json_data['search_nodes'][search_text][distance]
+                    distance_data
                 )

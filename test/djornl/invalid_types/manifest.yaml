@@ -1,0 +1,5 @@
+- data_type: edge
+  path: merged_edges-AMW-060820_AF.tsv
+
+- data_type: node
+  path: aranet2-aragwas-MERGED-AMW-v2_091319_nodeTable.csv
